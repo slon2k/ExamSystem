@@ -5,13 +5,13 @@ using System.Text;
 
 namespace ApplicationCore.Entities
 {
-    public abstract class Question : Entity<Guid>
+    public abstract class Question : Entity
     {
         public string Title { get; set; }
         public string Descripton { get; set; }
         public Guid ExamId { get; set; }
         public Exam Exam { get; set; }
-        public int CategoryId { get; set; }
+        public Guid CategoryId { get; set; }
         public Category Category { get; set; }
         public int PointsToPass { get; set; }
     }

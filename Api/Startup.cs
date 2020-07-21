@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ApplicationCore.Entities;
+using ApplicationCore.Interfaces;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -34,6 +35,8 @@ namespace Api
 
             services.AddIdentity<AppUser, IdentityRole>()
                 .AddEntityFrameworkStores<DataContext>();
+
+            services.AddScoped(typeof(IAsyncRepository<>), typeof(Repository<>));
             services.AddControllers(); services.AddControllers();
         }
 

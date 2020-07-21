@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ApplicationCore.Entities
 {
-    public class Category : Entity<int>
+    public class Category : Entity
     {
         public string Title { get; set; }
         public string Description { get; set; }

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ApplicationCore.Entities
 {
-    public class Exam: Entity<Guid>
+    public class Exam: Entity
     {
         public string Title { get; set; }
         public string AppUserId { get; set; }
