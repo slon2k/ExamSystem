@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Api.Handlers.Categories;
 using Api.Models;
+using Api.Queries.Categories;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -15,29 +18,34 @@ namespace Api.Controllers
     public class CategoriesController : ControllerBase
     {
         private readonly IAsyncRepository<Category> _repository;
+        private readonly IMediator _mediator;
 
-        public CategoriesController(IAsyncRepository<Category> repository)
+        public CategoriesController(IAsyncRepository<Category> repository, IMediator mediator)
         {
             _repository = repository;
+            _mediator = mediator;
         }
 
         // GET: api/<CategoriesController>
         [HttpGet]
-        public async Task<IEnumerable<Category>> GetAll()
+        public async Task<ActionResult<IEnumerable<Category>>> GetAll()
         {
-            return await _repository.ListAllAsync();
+            var query = new GetAllCategoriesQuery();
+            var result = await _mediator.Send(query);
+            return Ok(result);
         }
 
         // GET api/<CategoriesController>/5
         [HttpGet("{id}")]
-        public async Task<ActionResult> Get(Guid id)
+        public async Task<ActionResult<CategoryDto>> Get(Guid id)
         {
-            var category = await _repository.GetByIdAsync(id);
-            if (category == null)
+            var query = new GetCategoryById.Query() { Id = id };
+            var response = await _mediator.Send(query);
+            if (response.Category == null)
             {
                 return NotFound();
             }
-            return Ok(category);
+            return Ok(response.Category);
         }
 
         // POST api/<CategoriesController>
