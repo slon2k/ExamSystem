@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Api.Handlers.Categories;
 using Api.Models;
 using Api.Queries.Categories;
 using ApplicationCore.Entities;
-using ApplicationCore.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,12 +15,10 @@ namespace Api.Controllers
     [ApiController]
     public class CategoriesController : ControllerBase
     {
-        private readonly IAsyncRepository<Category> _repository;
         private readonly IMediator _mediator;
 
-        public CategoriesController(IAsyncRepository<Category> repository, IMediator mediator)
+        public CategoriesController(IMediator mediator)
         {
-            _repository = repository;
             _mediator = mediator;
         }
 
@@ -50,46 +46,55 @@ namespace Api.Controllers
 
         // POST api/<CategoriesController>
         [HttpPost]
-        public async Task<Category> Post([FromBody] CategoryDto categoryDto)
+        public async Task<ActionResult> Post([FromBody] CreateCategory.Request request)
         {
-            var category = new Category
+            var response = await _mediator.Send(request);
+            if (response.Success)
             {
-                Title = categoryDto.Title,
-                Description = categoryDto.Description
-            };
-            return await _repository.CreateAsync(category);
+                return CreatedAtAction(nameof(Get), new { id = response.Category.Id }, response.Category);
+            }
+            return BadRequest(response.ErrorMessage);
         }
 
         // PUT api/<CategoriesController>/5
         [HttpPut("{id}")]
         public async Task<ActionResult> Put(Guid id, [FromBody] CategoryDto categoryDto)
         {
-            if (categoryDto.Id != id)
+            var request = new UpdateCategory.Request()
             {
-                return BadRequest();
-            }
-            var category = await _repository.GetByIdAsync(id);
-            if (category == null)
+                Id = id,
+                Description = categoryDto.Description,
+                Title = categoryDto.Title
+            };
+
+            var response = await _mediator.Send(request);
+            
+            if (response.Success)
+            {
+                return NoContent();
+            };
+
+            if (response.Category == null)
             {
                 return NotFound();
             }
-            category.Title = categoryDto.Title;
-            category.Description = categoryDto.Description;
-            await _repository.UpdateAsync(category);
-            return NoContent();
+
+            return BadRequest(response.ErrorMessage);
         }
 
         // DELETE api/<CategoriesController>/5
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(Guid id)
         {
-            var category = await _repository.GetByIdAsync(id);
-            if (category == null)
+            var response = await _mediator.Send(new DeleteCategory.Request() { Id = id });
+            
+            if (response.Success)
             {
-                return NotFound();
+                return NoContent();
             }
-            await _repository.DeleteAsync(category);
-            return NoContent();
+
+            return NotFound();
+        
         }
     }
 }
