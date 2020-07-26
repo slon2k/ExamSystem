@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Api.Handlers.Categories;
 using Api.Models;
-using Api.Queries.Categories;
 using ApplicationCore.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -26,8 +25,7 @@ namespace Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Category>>> GetAll()
         {
-            var query = new GetAllCategoriesQuery();
-            var result = await _mediator.Send(query);
+            var result = await _mediator.Send(new GetAllCategories.Request());
             return Ok(result);
         }
 
@@ -35,13 +33,14 @@ namespace Api.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<CategoryDto>> Get(Guid id)
         {
-            var query = new GetCategoryById.Query() { Id = id };
-            var response = await _mediator.Send(query);
-            if (response.Category == null)
+            var response = await _mediator.Send(new GetCategoryById.Request() { Id = id });
+            
+            if (response == null)
             {
                 return NotFound();
             }
-            return Ok(response.Category);
+
+            return Ok(response);
         }
 
         // POST api/<CategoriesController>
@@ -49,37 +48,23 @@ namespace Api.Controllers
         public async Task<ActionResult> Post([FromBody] CreateCategory.Request request)
         {
             var response = await _mediator.Send(request);
-            if (response.Success)
-            {
-                return CreatedAtAction(nameof(Get), new { id = response.Category.Id }, response.Category);
-            }
-            return BadRequest(response.ErrorMessage);
+            return CreatedAtAction("Get", new { id = response.Id }, response);
         }
 
         // PUT api/<CategoriesController>/5
         [HttpPut("{id}")]
-        public async Task<ActionResult> Put(Guid id, [FromBody] CategoryDto categoryDto)
+        public async Task<ActionResult> Put(Guid id, [FromBody] UpdateCategory.Request request)
         {
-            var request = new UpdateCategory.Request()
-            {
-                Id = id,
-                Description = categoryDto.Description,
-                Title = categoryDto.Title
-            };
+            request.Id = id;
 
             var response = await _mediator.Send(request);
-            
-            if (response.Success)
-            {
-                return NoContent();
-            };
-
-            if (response.Category == null)
+     
+            if (response == null)
             {
                 return NotFound();
             }
 
-            return BadRequest(response.ErrorMessage);
+            return NoContent();
         }
 
         // DELETE api/<CategoriesController>/5

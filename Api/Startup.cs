@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Api.Models;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
+using AutoMapper;
 using Infrastructure.Data;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
@@ -38,6 +40,7 @@ namespace Api
                 .AddEntityFrameworkStores<DataContext>();
 
             services.AddScoped(typeof(IAsyncRepository<>), typeof(Repository<>));
+            services.AddAutoMapper(typeof(MappingProfile));
             services.AddMediatR(typeof(Startup));
             services.AddControllers();
         }

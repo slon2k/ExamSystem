@@ -44,7 +44,7 @@ namespace Api.Handlers.Categories
                 }
                 catch (Exception)
                 {
-                    return new Response();
+                    throw;
                 }
                 
             }

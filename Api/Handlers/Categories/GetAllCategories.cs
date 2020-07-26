@@ -3,22 +3,19 @@ using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
 using AutoMapper;
 using MediatR;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Api.Handlers.Categories
 {
-    public class GetCategoryById
+    public class GetAllCategories
     {
-        public class Request : IRequest<CategoryDto>
+        public class Request : IRequest<IEnumerable<CategoryDto>>
         {
-            public Guid Id { get; set; }
         }
 
-        public class Handler : IRequestHandler<Request, CategoryDto>
+        public class Handler : IRequestHandler<Request, IEnumerable<CategoryDto>>
         {
             private readonly IAsyncRepository<Category> _repository;
             private readonly IMapper _mapper;
@@ -29,17 +26,12 @@ namespace Api.Handlers.Categories
                 _mapper = mapper;
             }
 
-            public async Task<CategoryDto> Handle(Request request, CancellationToken cancellationToken)
+            public async Task<IEnumerable<CategoryDto>> Handle(Request request, CancellationToken cancellationToken)
             {
-                var category = await _repository.GetByIdAsync(request.Id);
-                
-                if (category == null)
-                {
-                    return null;
-                }
-                
-                return _mapper.Map<CategoryDto>(category);
+                var categories = await _repository.ListAllAsync();
+                return _mapper.Map<IList<CategoryDto>>(categories);
             }
         }
+
     }
 }
