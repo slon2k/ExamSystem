@@ -1,9 +1,11 @@
-﻿using Api.Models;
+﻿using Api.Errors;
+using Api.Models;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
 using AutoMapper;
 using MediatR;
 using System;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -38,7 +40,7 @@ namespace Api.Handlers.Categories
                 }
                 catch (Exception)
                 {
-                    throw;
+                    throw new RestException(HttpStatusCode.BadRequest, new { Error = "Unable to create Category"});
                 }             
             }
         }

@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Net;
 using System.Threading.Tasks;
+using Api.Errors;
 using Api.Handlers.Categories;
 using Api.Models;
 using ApplicationCore.Entities;
@@ -80,6 +83,13 @@ namespace Api.Controllers
 
             return NotFound();
         
+        }
+
+        // PATCH api/<CategoriesController>/5
+        [HttpPatch("{id}")]
+        public async Task<ActionResult> PartialUpdate(Guid id)
+        {
+            throw new RestException(HttpStatusCode.BadRequest, new { Method = "Not implemented" });
         }
     }
 }
