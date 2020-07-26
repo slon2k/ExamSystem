@@ -6,6 +6,7 @@ using Api.Models;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
 using AutoMapper;
+using FluentValidation.AspNetCore;
 using Infrastructure.Data;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
@@ -42,7 +43,8 @@ namespace Api
             services.AddScoped(typeof(IAsyncRepository<>), typeof(Repository<>));
             services.AddAutoMapper(typeof(MappingProfile));
             services.AddMediatR(typeof(Startup));
-            services.AddControllers();
+            services.AddControllers()
+                .AddFluentValidation(cfg => cfg.RegisterValidatorsFromAssemblyContaining<Startup>());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
