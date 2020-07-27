@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Api.Errors;
 using Api.Models;
@@ -9,7 +10,9 @@ using ApplicationCore.Interfaces;
 using AutoMapper;
 using FluentValidation.AspNetCore;
 using Infrastructure.Data;
+using Infrastructure.Services;
 using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
@@ -22,6 +25,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Api
 {
@@ -43,7 +47,30 @@ namespace Api
             services.AddIdentity<AppUser, IdentityRole>()
                 .AddEntityFrameworkStores<DataContext>();
 
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["SecurityKey"]));
+
+            services.AddAuthentication(o => {
+                    o.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    o.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                    o.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
+                .AddJwtBearer(o =>
+                {
+                    o.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = key,
+                        ValidateAudience = false,
+                        ValidateIssuer = false,
+                        ValidateLifetime = true,
+                        ClockSkew = TimeSpan.Zero
+                    };
+                });
+
+            services.AddAuthorization();
+
             services.AddScoped(typeof(IAsyncRepository<>), typeof(Repository<>));
+            services.AddScoped<IJwtGenerator, JwtGenerator>();
             services.AddAutoMapper(typeof(MappingProfile));
             services.AddMediatR(typeof(Startup));
             services.AddControllers()

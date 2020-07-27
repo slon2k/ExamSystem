@@ -87,7 +87,7 @@ namespace Api.Controllers
 
         // PATCH api/<CategoriesController>/5
         [HttpPatch("{id}")]
-        public async Task<ActionResult> PartialUpdate(Guid id)
+        public ActionResult PartialUpdate(Guid id)
         {
             throw new RestException(HttpStatusCode.BadRequest, new { Method = "Not implemented" });
         }
