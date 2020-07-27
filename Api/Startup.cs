@@ -71,6 +71,7 @@ namespace Api
 
             services.AddScoped(typeof(IAsyncRepository<>), typeof(Repository<>));
             services.AddScoped<IJwtGenerator, JwtGenerator>();
+            services.AddScoped<IUserAccessor, UserAccessor>();
             services.AddAutoMapper(typeof(MappingProfile));
             services.AddMediatR(typeof(Startup));
             services.AddControllers()

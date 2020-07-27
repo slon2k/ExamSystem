@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Api.Handlers.Auth;
 using Api.Models;
 using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -25,7 +27,7 @@ namespace Api.Controllers
         public async Task<ActionResult<AuthData>> Login(Login.Request request)
         {
             var result = await _mediator.Send(request);
-            
+
             if (result != null)
             {
                 return result;
@@ -38,7 +40,7 @@ namespace Api.Controllers
         public async Task<ActionResult<AuthData>> Register(Register.Request request)
         {
             var result = await _mediator.Send(request);
-            
+
             if (result != null)
             {
                 return result;
@@ -47,7 +49,12 @@ namespace Api.Controllers
             return BadRequest("Unable to create user");
         }
 
-
-
+        [HttpGet("user")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<ActionResult<User.Response>> GetCurrentUser()
+        {
+            var result = await _mediator.Send(new User.Request());
+            return result;
+        }
     }
 }
