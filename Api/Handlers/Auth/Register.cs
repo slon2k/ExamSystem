@@ -24,13 +24,11 @@ namespace Api.Handlers.Auth
 
         public class Handler : IRequestHandler<Request, AuthData>
         {
-            private readonly SignInManager<AppUser> _signInManager;
             private readonly UserManager<AppUser> _userManager;
             private readonly IJwtGenerator _jwtGenerator;
 
-            public Handler(SignInManager<AppUser> signInManager, UserManager<AppUser> userManager, IJwtGenerator jwtGenerator)
+            public Handler(UserManager<AppUser> userManager, IJwtGenerator jwtGenerator)
             {
-                _signInManager = signInManager;
                 _userManager = userManager;
                 _jwtGenerator = jwtGenerator;
             }

@@ -84,12 +84,5 @@ namespace Api.Controllers
             return NotFound();
         
         }
-
-        // PATCH api/<CategoriesController>/5
-        [HttpPatch("{id}")]
-        public ActionResult PartialUpdate(Guid id)
-        {
-            throw new RestException(HttpStatusCode.BadRequest, new { Method = "Not implemented" });
-        }
     }
 }
