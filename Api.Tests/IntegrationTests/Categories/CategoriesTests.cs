@@ -19,15 +19,18 @@ namespace Api.Tests.IntegrationTests.Categories
         private CustomWebApplicationFactory<Startup> factory;
         const string BaseURL = "https://localhost";
         private HttpClient client { get; set; }
+        private List<CategoryDto> categories { get; set; }
 
         [TestInitialize]
-        public void Initialize()
+        public async Task Initialize()
         {
             factory = new CustomWebApplicationFactory<Startup>(); 
             client = factory.CreateClient(new WebApplicationFactoryClientOptions
             {
                 BaseAddress = new Uri(BaseURL)
             });
+            var response = await client.GetAsync("/api/categories");
+            categories = await response.Content.ReadFromJsonAsync<List<CategoryDto>>();
         }
 
         [TestMethod]
@@ -45,8 +48,22 @@ namespace Api.Tests.IntegrationTests.Categories
             var categories = await response.Content.ReadFromJsonAsync<List<CategoryDto>>();
             
             Assert.IsNotNull(categories);
-            Assert.AreEqual("Title 1", categories[0].Title);
-            Assert.AreEqual("Description 1", categories[0].Description);
+            Assert.AreEqual("Title 1", categories[0]?.Title);
+            Assert.AreEqual("Description 1", categories[0]?.Description);
+        }
+
+        [TestMethod]
+        public async Task ReturnsSingleCategory()
+        {
+            var id = categories[0].Id ?? null;
+            var response = await client.GetAsync(@$"/api/categories/{id}");
+            var category = await response.Content.ReadFromJsonAsync<CategoryDto>();
+            var statusCode = response.StatusCode;
+            
+            Assert.AreEqual(HttpStatusCode.OK, statusCode);
+            Assert.IsNotNull(category);
+            Assert.AreEqual("Title 1", category?.Title);
+            Assert.AreEqual("Description 1", category?.Description);
         }
 
         [TestMethod]
@@ -63,7 +80,36 @@ namespace Api.Tests.IntegrationTests.Categories
             Assert.AreEqual("New Description", createdCategory.Description);
         } 
 
+        [TestMethod]
+        public async Task CanUpdateCategory()
+        {
+            var count = categories.Count;
+            var id = categories[count - 1].Id ?? null;
+            var category = new CategoryDto() { Title = "Updated Title", Description = "Updated Description" };
+            var requestdata = JsonSerializer.Serialize(category);
+            HttpContent content = new StringContent(requestdata, Encoding.UTF8, "application/json");
+            
+            var response = await client.PutAsync(@$"/api/categories/{id}", content);
+            Assert.AreEqual(HttpStatusCode.NoContent, response.StatusCode);
 
+            response = await client.GetAsync(@$"/api/categories/{id}");
+            var updatedCategory = await response.Content.ReadFromJsonAsync<CategoryDto>();
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            Assert.AreEqual("Updated Title", updatedCategory.Title);
+            Assert.AreEqual("Updated Description", updatedCategory.Description);
+        }
+        
+        [TestMethod]
+        public async Task CanDeleteCategory()
+        {
+            var count = categories.Count;
+            Guid? id = categories[count -1].Id ?? null;
 
+            var response = await client.DeleteAsync(@$"/api/categories/{id}");           
+            Assert.AreEqual(HttpStatusCode.NoContent, response.StatusCode);
+            
+            response = await client.GetAsync(@$"/api/categories/{id}");
+            Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
+        }
     }
 }

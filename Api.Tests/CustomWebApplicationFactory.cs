@@ -1,5 +1,7 @@
-﻿using Infrastructure.Data;
+﻿using ApplicationCore.Entities;
+using Infrastructure.Data;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -34,12 +36,14 @@ namespace Api.Tests
                 {
                     var scopedServices = scope.ServiceProvider;
                     var db = scopedServices.GetRequiredService<DataContext>();
+                    var roleManager = scopedServices.GetRequiredService<RoleManager<IdentityRole>>();
+                    var userManager = scopedServices.GetRequiredService<UserManager<AppUser>>();
 
                     db.Database.EnsureCreated();
 
                     try
                     {
-                        DbInitializer.SeedData(db);
+                        DbInitializer.SeedData(db, roleManager, userManager);
                     }
                     catch
                     {
