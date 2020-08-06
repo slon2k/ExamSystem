@@ -14,7 +14,7 @@ using System.Text;
 namespace Api.Tests.IntegrationTests.Categories
 {
     [TestClass]
-    public class GetAllCategories
+    public class CategoriesTests
     {
         private CustomWebApplicationFactory<Startup> factory;
         const string BaseURL = "https://localhost";
@@ -39,37 +39,28 @@ namespace Api.Tests.IntegrationTests.Categories
         }
 
         [TestMethod]
-        public async Task ReturnsListOfSixCategories()
+        public async Task ReturnsListOfCategories()
         {
-            var category = new CategoryDto() { Title = "New Title", Description = "New Description" };
-            var requestdata = JsonSerializer.Serialize(category);
-            HttpContent content = new StringContent(requestdata, Encoding.UTF8, "application/json");
-            var responsePost = await client.PostAsync("/api/categories", content);
-
-
             var response = await client.GetAsync("/api/categories");
-            //var contentGet = await response.Content.ReadFromJsonAsync<object>();
             var categories = await response.Content.ReadFromJsonAsync<List<CategoryDto>>();
             
             Assert.IsNotNull(categories);
-
+            Assert.AreEqual("Title 1", categories[0].Title);
+            Assert.AreEqual("Description 1", categories[0].Description);
         }
 
         [TestMethod]
         public async Task CanCreateCategory()
         {
-            var category = new CategoryDto() { Title = "New Title", Description = "New Description"};
+            var category = new CategoryDto() { Title = "New Title", Description = "New Description" };
             var requestdata = JsonSerializer.Serialize(category);
             HttpContent content = new StringContent(requestdata, Encoding.UTF8, "application/json");
             var response = await client.PostAsync("/api/categories", content);
-            var responseContent = await response.Content.ReadFromJsonAsync<object>();
+            var createdCategory = await response.Content.ReadFromJsonAsync<CategoryDto>();
 
             Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
-
-            var newresponse = await client.GetAsync("/api/categories");
-            var newresponseContent = await newresponse.Content.ReadFromJsonAsync<object>();
-            Assert.AreEqual(HttpStatusCode.OK, newresponse.StatusCode);
-
+            Assert.AreEqual("New Title", createdCategory.Title);
+            Assert.AreEqual("New Description", createdCategory.Description);
         } 
 
 

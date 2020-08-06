@@ -16,7 +16,7 @@ namespace Api.Tests
             {
                 try
                 {
-                    categories.AddRange(GetCategories());
+                    context.Categories.AddRange(GetCategories());
                     context.SaveChanges();
                     var count = categories.Count();
                 }
