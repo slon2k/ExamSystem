@@ -7,9 +7,7 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Collections.Generic;
 using Api.Models;
-using System.Linq;
-using System.Text.Json;
-using System.Text;
+using Api.Tests.Utils;
 
 namespace Api.Tests.IntegrationTests.Categories
 {
@@ -70,9 +68,7 @@ namespace Api.Tests.IntegrationTests.Categories
         public async Task CanCreateCategory()
         {
             var category = new CategoryDto() { Title = "New Title", Description = "New Description" };
-            var requestdata = JsonSerializer.Serialize(category);
-            HttpContent content = new StringContent(requestdata, Encoding.UTF8, "application/json");
-            var response = await client.PostAsync("/api/categories", content);
+            var response = await client.PostAsync("/api/categories", HttpClientUtils.CreateContent(category));
             var createdCategory = await response.Content.ReadFromJsonAsync<CategoryDto>();
 
             Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
@@ -86,10 +82,8 @@ namespace Api.Tests.IntegrationTests.Categories
             var count = categories.Count;
             var id = categories[count - 1].Id ?? null;
             var category = new CategoryDto() { Title = "Updated Title", Description = "Updated Description" };
-            var requestdata = JsonSerializer.Serialize(category);
-            HttpContent content = new StringContent(requestdata, Encoding.UTF8, "application/json");
             
-            var response = await client.PutAsync(@$"/api/categories/{id}", content);
+            var response = await client.PutAsync(@$"/api/categories/{id}", HttpClientUtils.CreateContent(category));
             Assert.AreEqual(HttpStatusCode.NoContent, response.StatusCode);
 
             response = await client.GetAsync(@$"/api/categories/{id}");
